@@ -39,3 +39,10 @@ train_labels = to_categorical(train_labels)
 test_labels = to_categorical(test_labels)
 
 network.fit(train_images, train_labels, epochs = 5, batch_size = 128)
+
+"""
+# Having an error...Didn't know why yet.
+I'm making this Mnist machine-learning script just a few days ago...
+But I'm new at python, so having no idea about which part of this code is wrong and generating errors. :(
+Please help!
+"""
