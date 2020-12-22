@@ -3,8 +3,6 @@
 from keras.datasets import reuters
 #로이터에서 공개한 짧은 뉴스 기사와 토픽의 집합인 로이터 데이터샛을 사용함.   46개의 토픽, 각 토픽 당 최소한 10개의 샘플
 
-
-
 (train_data, train_labels), (test_data, test_labels) = reuters.load_data(num_words = 10000)
 #데이터에서 가장 자주 등장하는 단어 1만 개로 제한.
 
@@ -53,7 +51,7 @@ model.add(layers.Dense(46, activation = 'softmax'))
 
 model.compile(optimizer = 'rmsprop',
               loss = 'categorical_crossentropy',
-              metrics = ['accuracy']) # 모델 컴파일하기
+              metrics = ['acc']) # 모델 컴파일하기
 
 # 훈련 데이터에서 1000개의 샘플을 따로 떼어 검증 세트로 사용
 
@@ -85,6 +83,22 @@ plt.plot(epochs, val_loss, 'b', label = 'Validation loss') # 파란색 선
 plt.title('Training and validation loss')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
+plt.legend() #??
+
+plt.show()
+
+#훈련과 검증 정확도 곡선 그리기
+
+plt.clf() # 그래프 초기화
+
+acc = history.history['acc']
+val_acc = history.history['val_acc']
+
+plt.plot(epochs, acc, 'bo', label = 'Training acc') # 파란색 점
+plt.plot(epochs, val_acc, 'b', label = 'Validation acc') # 파란색 선
+plt.title('Training and validation acc')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
 plt.legend() #??
 
 plt.show()
