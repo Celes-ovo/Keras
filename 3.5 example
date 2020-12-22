@@ -1,0 +1,90 @@
+# 전체 코드
+
+from keras.datasets import reuters
+#로이터에서 공개한 짧은 뉴스 기사와 토픽의 집합인 로이터 데이터샛을 사용함.   46개의 토픽, 각 토픽 당 최소한 10개의 샘플
+
+
+
+(train_data, train_labels), (test_data, test_labels) = reuters.load_data(num_words = 10000)
+#데이터에서 가장 자주 등장하는 단어 1만 개로 제한.
+
+"""
+>>> len(train_data)
+8982
+>>>len(test_data)
+2246
+"""
+#8982개의 훈련 샘플과 2246개의 테스트 샘플이 있음. + 각 샘플은 정수 리스트.
+
+import numpy as np
+
+def vectorize_sequences(sequences, dimension = 10000):
+  results = np.zeros((len(sequences), dimension)) # 크기가 (len(sequences), dimension)이고 모든 원소가 0인 행렬 생성.
+  for i, sequence in enumerate(sequences):
+    results[i, sequence] = 1. # ???  results[i]에서 특정 인덱스의 위치를 1로 만든다는데...
+  return results
+
+x_train = vectorize_sequences(train_data)
+x_test = vectorize_sequences(test_data)
+
+def to_one_hot(labels, dimension = 46): # 원 핫 인코딩
+  results = np.zeros((len(labels), dimension))
+  for i, label in enumerate(labels):
+    results[i, label] = 1. # ??
+  return results
+
+one_hot_train_labels = to_one_hot(train_labels) # 훈련 레이블 벡터 변환
+one_hot_test_labels = to_one_hot(test_labels) # 테스트 레이블 벡터 변환
+
+"""
+from keras.utils.np_utils import to_categorical
+
+one_hot_train_labels = to_categorical(train_labels)
+one_hot_test_labels = to_categorical(test_labels)
+"""
+
+from keras import models
+from keras import layers
+
+model = models.Sequential()
+model.add(layers.Dense(64, activation = 'relu', input_shape = (10000,))) # 10000, 의 뜻?
+model.add(layers.Dense(64, activation = 'relu'))
+model.add(layers.Dense(46, activation = 'softmax'))
+
+model.compile(optimizer = 'rmsprop',
+              loss = 'categorical_crossentropy',
+              metrics = ['accuracy']) # 모델 컴파일하기
+
+# 훈련 데이터에서 1000개의 샘플을 따로 떼어 검증 세트로 사용
+
+x_val = x_train[:1000]
+partial_x_train = x_train[1000:]  # ?? 1000:, :1000
+
+y_val = one_hot_train_labels[:1000]
+partial_y_train = one_hot_train_labels[1000:]
+
+# 20번의 epoch로 모델을 훈련
+
+history = model.fit(partial_x_train,
+                    partial_y_train,
+                    epochs = 20,
+                    batch_size = 512,
+                    validation_data = (x_val, y_val))
+
+#손실과 정확도 곡선 그리기
+
+import matplotlib.pyplot as plt
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs = range(1, len(loss) + 1)
+
+plt.plot(epochs, loss, 'bo', label = 'Training loss') # 파란색 점
+plt.plot(epochs, val_loss, 'b', label = 'Validation loss') # 파란색 선
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend() #??
+
+plt.show()
